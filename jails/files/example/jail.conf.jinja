@@ -1,0 +1,24 @@
+{% set jails = salt.pillar.get('jails') %}
+
+exec.prestart += "cp /etc/resolv.conf $path/etc";
+exec.prestart += "cp /etc/localtime $path/etc";
+exec.start = "/bin/sh /etc/rc";
+exec.stop += "/bin/sh /etc/rc.shutdown";
+exec.poststop += "rm $path/etc/resolv.conf";
+exec.poststop += "rm $path/etc/localtime";
+exec.clean;
+
+mount.devfs;
+mount.fstab = "/etc/fstab.$name";
+
+ip4.addr = x.x.x.$ip;
+
+path = "/jails/$name";
+interface = "xxx";
+host.hostname = "$name.xxx";
+
+{% for jail, cfg in jails.instances.items() %}
+{{ jail }} {
+{{ cfg.jail_conf }}
+}
+{% endfor %}
