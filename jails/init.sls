@@ -27,7 +27,7 @@ jail_root:
 
 {{ jail }}_directory:
   file.managed:
-    - name: {{ jails.root | path_join(jail) | path_join('.saltstack') }}
+    - name: {{ jails.root | path_join(jail, '.saltstack') }}
     - contents_pillar: jails:instances:{{ jail }}:version
     - mode: 600
     - user: root
@@ -59,7 +59,7 @@ jail_root:
 
 {{ jail }}_init_rc_conf:
   file.managed:
-    - name: {{ jails.root | path_join(jail) | path_join('etc/rc.conf') }} 
+    - name: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }} 
     - contents_pillar: jails:instances:{{ jail }}:rc_conf
     - onchanges:
       - file: {{ jail }}_directory
@@ -70,7 +70,7 @@ jail_root:
 
 {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}:
   file.patch:
-    - name: {{ jails.root | path_join(jail) | path_join(patch.target) }} 
+    - name: {{ jails.root | path_join(jail, patch.target) }} 
     - source: salt://jails/files/patches/{{ cfg.version | path_join(patch.diff) }}
     - hash: {{ patch.hash }}
     - onchanges:
@@ -80,7 +80,7 @@ jail_root:
 
 {{ jail }}_cap_mkdb_{{ loop.index }}:
   cmd.run:
-    - name: cap_mkdb {{ jails.root | path_join(jail) | path_join('/etc/login.conf') }} 
+    - name: cap_mkdb {{ jails.root | path_join(jail, 'etc', 'login.conf') }} 
     - cwd: {{ jails.root | path_join(jail) }} 
     - onchanges:
       - file: {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}
@@ -93,7 +93,7 @@ jail_root:
 
 {{ jail }}_pkg_repos:
   file.directory:
-    - name: {{ jails.root | path_join(jail) | path_join('/usr/local/etc/pkg/repos') }}
+    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos') }}
     - user: root
     - group: wheel
     - makedirs: True
@@ -105,7 +105,7 @@ jail_root:
 
 {{ jail }}_pkg_repo_{{ repo }}:
   file.managed:
-    - name: {{ jails.root | path_join(jail) | path_join('/usr/local/etc/pkg/repos') | path_join(repo) }}
+    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos', repo) }}
     - user: root
     - group: wheel
     - mode: 644
