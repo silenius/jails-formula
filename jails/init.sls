@@ -42,7 +42,7 @@ jail_root:
 
 {{ jail }}_set_{{ set }}:
   cmd.run:
-    - name: fetch "https://download.freebsd.org/ftp/releases/amd64/{{ cfg.version }}/{{ set }}" -4 -q -o - | tar -x -C {{ jails.root | path_join(jail) }} -f -
+    - name: fetch {{ cfg.get('fetch_url', 'https://download.freebsd.org/ftp/releases/amd64/').rstrip('/') }}/{{ cfg.version }}/{{ set }} -4 -q -o - | tar -x -C {{ jails.root | path_join(jail) }} -f -
     - cwd: /tmp
     - onchanges:
       - file: {{ jail }}_directory
@@ -72,7 +72,6 @@ jail_root:
   file.patch:
     - name: {{ jails.root | path_join(jail, patch.target) }} 
     - source: salt://jails/files/patches/{{ cfg.version | path_join(patch.diff) }}
-    - hash: {{ patch.hash }}
     - onchanges:
       - file: {{ jail }}_directory
 
