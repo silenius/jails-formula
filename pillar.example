@@ -1,0 +1,121 @@
+jails:
+  root: /jails
+  jail_conf: /etc/jail.conf
+  jail_conf_template: salt://jails/files/templates/jail.conf.jinja
+  instances:
+    pg11:
+      present: true
+      version: 11.2-RELEASE
+      init_scripts: 
+        - salt://jails/files/scripts/jail_init.sh
+      sets:
+        - base.txz
+        - lib32.txz
+      salt:
+        minion_id: pg11.lan
+        master: salt.lan
+      jail_conf: |
+        $ip = 39;
+        allow.sysvipc = 1;
+      rc_conf: |
+        network_interfaces=""
+        rpcbind_enable="NO"
+        cron_flags="$cron_flags -J 15"
+        syslogd_flags="-ss"
+        sendmail_enable="NONE"
+        sshd_enable="YES"
+        salt_minion_enable="YES"
+      patches:
+        - target: /etc/login.conf
+          diff: patch-login.conf
+          hash: 07ebd5eaebb5f9bb87e769356bec62fb
+      pkg:
+        FreeBSD.conf: |
+          FreeBSD: { enabled: no }
+        myrepo.conf: |
+          myrepo: {
+            url: "http://some.poudriere.host/packages/11_2amd64-b_2019Q1-server",
+            enabled: yes
+          }
+      fstab:
+        - jail_path: /data/jails/pg11
+          host_path: /jails/pg11/data 
+          fstype: nullfs
+          opts: rw 
+
+        - jail_path: /data/jails/pg11/data11
+          host_path: /jails/pg11/data/data11 
+          fstype: nullfs
+          opts: rw 
+          user: 770
+          group: 770
+          mode: 700
+
+        - jail_path: /data/jails/pg11/backups
+          host_path: /jails/pg11/data/backups 
+          fstype: nullfs
+          opts: rw 
+          user: 770
+          group: 770
+          mode: 700
+    oldstuff:
+      present: true
+      version: 10.4-RELEASE
+      init_scripts: 
+        - salt://jails/files/scripts/jail_init.sh
+      sets:
+        - base.txz
+        - lib32.txz
+      salt:
+        minion_id: oldstuff.lan
+        master: salt.lan
+      jail_conf: |
+        $ip = 39;
+        depend = pg11;
+      rc_conf: |
+        network_interfaces=""
+        rpcbind_enable="NO"
+        cron_flags="$cron_flags -J 15"
+        syslogd_flags="-ss"
+        sendmail_enable="NONE"
+        sshd_enable="YES"
+        salt_minion_enable="YES"
+    anotherjail:
+      present: true
+      version: 12.0-RELEASE
+      init_scripts: 
+        - salt://jails/files/scripts/jail_init.sh
+        - salt://jails/files/scripts/another_script.sh
+      sets:
+        - base.txz
+        - lib32.txz
+      salt:
+        minion_id: anotherjail.lan
+        master: salt.lan
+      jail_conf: |
+        $ip = 31;
+      rc_conf: |
+        network_interfaces=""
+        rpcbind_enable="NO"
+        cron_flags="$cron_flags -J 15"
+        syslogd_flags="-b anotherjail.lan -4"
+        sendmail_enable="NONE"
+        sshd_enable="YES"
+        salt_minion_enable="YES"
+      patches:
+        - target: /etc/login.conf
+          diff: patch-login.conf
+          hash: 07ebd5eaebb5f9bb87e769356bec62fb
+      fstab:
+        - jail_path: /data/jails/anotherjail
+          host_path: /jails/anotherjail/data 
+          fstype: nullfs
+          opts: rw 
+      pkg:
+        FreeBSD.conf: |
+          FreeBSD: { enabled: no }
+        myrepo.conf: |
+          myrepo: {
+            url: "http://some.poudriere.host/packages/12_0amd64-b_2019Q3-server",
+            enabled: yes
+          }
