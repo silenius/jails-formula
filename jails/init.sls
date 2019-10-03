@@ -94,7 +94,7 @@ jail_root:
   file.replace:
     - name: {{ jails.root | path_join(jail, 'etc', 'freebsd-update.conf') }}
     - pattern: |
-        ^Components\s+
+        ^Components\s+.*
     - repl: |
         Components world
     - backup: False
