@@ -8,7 +8,6 @@ pkg lock -y py27-salt
 cp /usr/local/etc/salt/minion.sample /usr/local/etc/salt/minion
 mkdir -p /usr/local/etc/salt/minion.d
 sed -i '' "s/^#default_include:.*/default_include: minion.d\/\*.conf/" /usr/local/etc/salt/minion
-sed -i '' "s/^Components .*/Components world/" /etc/freebsd-update.conf
 EOF
 
 cat << EOF > "${JAIL_ROOT}/usr/local/etc/salt/minion.d/10-main.conf"

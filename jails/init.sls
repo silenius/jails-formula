@@ -88,6 +88,22 @@ jail_root:
 
 {% endfor %}
 
+# Adapt Components of freebsd-update.conf
+
+{{ jail }}_freebsd_update_conf:
+  file.replace:
+    - name: {{ jails.root | path_join(jail, 'etc', 'freebsd-update.conf') }}
+    - pattern: |
+        ^Components\s+
+    - repl: |
+        Components world
+    - backup: False
+    - onchanges:
+      - cmd: {{ jail }}_set_base.txz
+    - require_in:
+      - cmd: {{ jail }}_freebsd_update_fetch
+      - cmd: {{ jail }}_freebsd_update_install
+
 # pkg repos
 
 {{ jail }}_pkg_repos:
