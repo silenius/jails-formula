@@ -2,9 +2,9 @@
 
 jexec "${JAIL_NAME}" << EOF
 pkg install pkg
-pkg install py27-salt
+pkg install ${PKG_SALT}
 pkg install ca_root_nss
-pkg lock -y py27-salt
+pkg lock -y ${PKG_SALT}
 cp /usr/local/etc/salt/minion.sample /usr/local/etc/salt/minion
 mkdir -p /usr/local/etc/salt/minion.d
 sed -i '' "s/^#default_include:.*/default_include: minion.d\/\*.conf/" /usr/local/etc/salt/minion

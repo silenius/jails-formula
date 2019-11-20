@@ -204,6 +204,7 @@ jail_root:
       - JAIL_NAME: {{ jail }}
       - SALT_MASTER: {{ cfg.salt.master }}
       - MINION_ID: {{ cfg.salt.minion_id }}
+      - PKG_SALT: "py36-salt"
     - require:
       - cmd: {{ jail }}_start
     - onchanges:
