@@ -69,6 +69,7 @@ jails:
       salt:
         minion_id: oldstuff.lan
         master: salt.lan
+        pkg: py27-salt
       jail_conf: |
         $ip = 39;
         depend = pg11;
