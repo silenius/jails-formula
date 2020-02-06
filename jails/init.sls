@@ -1,11 +1,11 @@
+{% from "jails/map.jinja" import jails with context %}
+
 include:
   - jails.jail_conf
   - jails.freebsd_update
   {%- if salt.pillar.get('zfs:fs') %}
   - zfs.fs
   {%- endif %}
-
-{% set jails = salt.pillar.get('jails') %}
 
 # Root directory for all jails
 

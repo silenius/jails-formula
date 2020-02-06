@@ -1,0 +1,3 @@
+{% set jails = salt.pillar.get('jails') %}
+
+{% do salt.log.info(jails) %} 

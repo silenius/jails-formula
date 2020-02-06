@@ -1,3 +1,5 @@
+# vim: syntax=yaml
+
 jails:
   root: /jails
   jail_conf: /etc/jail.conf
