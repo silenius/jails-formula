@@ -55,7 +55,7 @@ jail_root:
 
 # Minimal rc.conf
 
-{% for rc_param, rc_value in jail.rc_conf.items() %}
+{% for rc_param, rc_value in cfg.rc_conf.items() %}
 
 {{ jail }}_rc_conf_{{ rc_param }}:
   sysrc.managed:
