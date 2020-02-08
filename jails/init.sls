@@ -35,6 +35,8 @@ jail_root:
     {%- if not jails.get('use_zfs', True) %}
     - makedirs: True
     {%- endif %}
+    - unless: 
+      - ls -A {{ jails.root | path_join(jail) }} | grep -q .
 
 {% for set in cfg.sets %}
 
