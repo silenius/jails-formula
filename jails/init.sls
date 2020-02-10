@@ -57,6 +57,19 @@ jail_root:
 
 # Minimal rc.conf
 
+# Workaround PR 240875
+
+{{ jail }}_rc_conf:
+  file.managed:
+    - name: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }}
+    - user: root
+    - group: wheel
+    - mode: 644
+    - require:
+      {% for set in cfg.sets %}
+      - cmd: {{ jail }}_set_{{ set }}
+      {% endfor %}
+
 {% for rc_param, rc_value in cfg.rc_conf.items() %}
 
 {{ jail }}_rc_conf_{{ rc_param }}:
@@ -67,10 +80,8 @@ jail_root:
     - require_in:
       - cmd: {{ jail }}_start
     - require:
+      - file: {{ jail }}_rc_conf
       - file: {{ jail }}_directory
-      {% for set in cfg.sets %}
-      - cmd: {{ jail }}_set_{{ set }}
-      {% endfor %}
 
 {% endfor %}  # RC_CONF
 
