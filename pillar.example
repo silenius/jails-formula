@@ -19,14 +19,8 @@ jails:
       jail_conf: |
         $ip = 39;
         allow.sysvipc = 1;
-      rc_conf: |
-        network_interfaces=""
-        rpcbind_enable="NO"
-        cron_flags="$cron_flags -J 15"
-        syslogd_flags="-ss"
-        sendmail_enable="NONE"
-        sshd_enable="YES"
-        salt_minion_enable="YES"
+      rc_conf:
+        foo_enable: "'YES'"
       patches:
         - target: /etc/login.conf
           diff: patch-login.conf
@@ -75,14 +69,6 @@ jails:
       jail_conf: |
         $ip = 39;
         depend = pg11;
-      rc_conf: |
-        network_interfaces=""
-        rpcbind_enable="NO"
-        cron_flags="$cron_flags -J 15"
-        syslogd_flags="-ss"
-        sendmail_enable="NONE"
-        sshd_enable="YES"
-        salt_minion_enable="YES"
     anotherjail:
       present: true
       version: 12.0-RELEASE
@@ -97,14 +83,9 @@ jails:
         master: salt.lan
       jail_conf: |
         $ip = 31;
-      rc_conf: |
-        network_interfaces=""
-        rpcbind_enable="NO"
-        cron_flags="$cron_flags -J 15"
-        syslogd_flags="-b anotherjail.lan -4"
-        sendmail_enable="NONE"
-        sshd_enable="YES"
-        salt_minion_enable="YES"
+      rc_conf:
+        some_daemon_enable: "'YES'"
+        some_daemon_flags: "-foo -bar"
       patches:
         - target: /etc/login.conf
           diff: patch-login.conf
