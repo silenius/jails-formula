@@ -60,10 +60,8 @@ jail_root:
 {% for rc_param, rc_value in cfg.rc_conf.items() %}
 
 {{ jail }}_rc_conf_{{ rc_param }}:
-  sysrc.managed:
-    - name: {{ rc_param }}
-    - value: {{ rc_value }}
-    - file: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }}
+  cmd.run:
+    - name: sysrc -f {{ jails.root | path_join(jail, 'etc', 'rc.conf') }} {{ rc_param }}={{ rc_value }}
     - require_in:
       - cmd: {{ jail }}_start
     - require:
