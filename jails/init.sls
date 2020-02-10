@@ -50,19 +50,27 @@ jail_root:
       - cmd: {{ jail }}_freebsd_update_fetch
     - watch_in:
       - file: jail_etc_jail_conf
-    - require_in:
-      - file: {{ jail }}_init_rc_conf
 
 {% endfor %}  # SETS
 
 # Minimal rc.conf
 
-{{ jail }}_init_rc_conf:
-  file.managed:
-    - name: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }} 
-    - contents_pillar: jails:instances:{{ jail }}:rc_conf
-    - onchanges:
+{% for rc_param, rc_value in cfg.rc_conf.items() %}
+
+{{ jail }}_rc_conf_{{ rc_param }}:
+  sysrc.managed:
+    - name: {{ rc_param }}
+    - value: {{ rc_value }}
+    - file: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }}
+    - require_in:
+      - cmd: {{ jail }}_start
+    - require:
       - file: {{ jail }}_directory
+      {% for set in cfg.sets %}
+      - cmd: {{ jail }}_set_{{ set }}
+      {% endfor %}
+
+{% endfor %}  # RC_CONF
 
 # Patches 
 
@@ -186,7 +194,6 @@ jail_root:
     - name: service jail onestart {{ jail }}
     - cwd: /tmp
     - require:
-      - file: {{ jail }}_init_rc_conf
       - file: jail_etc_jail_conf
     - onchanges:
       - file: {{ jail }}_directory

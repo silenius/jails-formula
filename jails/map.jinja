@@ -1,3 +1,11 @@
 {% set jails = salt.pillar.get('jails') %}
 
-{% do salt.log.info(jails) %} 
+{% for jail_name, jail_config in jails.instances.items() %}
+
+{% import_yaml "jails/defaults/" | path_join(jail_config.version, 'rc_conf.yaml') as rc_conf %}
+
+{% do jail_config.update({'rc_conf': salt.slsutil.merge(rc_conf.rc_conf, jail_config.rc_conf|default({}))}) %}
+
+{% endfor %}
+
+{# {% do salt.log.info(jails) %} #}
