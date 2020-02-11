@@ -23,7 +23,9 @@ jail_root:
 
 {% for jail, cfg in jails.instances.items() %}
 
-# Jail directory
+#######################
+# JAIL ROOT DIRECTORY #
+#######################
 
 {{ jail }}_directory:
   file.managed:
@@ -38,9 +40,11 @@ jail_root:
     - unless: 
       - ls -A {{ jails.root | path_join(jail) }} | grep -q .
 
-{% for set in cfg.sets %}
+########
+# SETS #
+########
 
-# Create jail
+{% for set in cfg.sets %}
 
 {{ jail }}_set_{{ set }}:
   cmd.run:
@@ -55,7 +59,9 @@ jail_root:
 
 {% endfor %}  # SETS
 
-# Minimal rc.conf
+#####################
+# JAIL /etc/rc.conf #
+#####################
 
 # Workaround PR 240875
 
@@ -85,7 +91,9 @@ jail_root:
 
 {% endfor %}  # RC_CONF
 
-# Patches 
+###########
+# PATCHES #
+###########
 
 {% for patch in cfg.get('patches', ()) %}
 
@@ -109,7 +117,9 @@ jail_root:
 
 {% endfor %}
 
-# Adapt Components of freebsd-update.conf
+#################################
+# JAIL /etc/freebsd-update.conf #
+#################################
 
 {{ jail }}_freebsd_update_conf:
   file.replace:
@@ -125,7 +135,9 @@ jail_root:
       - cmd: {{ jail }}_freebsd_update_fetch
       - cmd: {{ jail }}_freebsd_update_install
 
-# pkg repos
+####################
+# PKG REPOSITORIES #
+####################
 
 {{ jail }}_pkg_repos:
   file.directory:
@@ -151,13 +163,19 @@ jail_root:
 
 {% endfor %}
 
-# /etc/fstab.xxx
+##############
+# JAIL FSTAB #
+##############
 
 {{ jail }}_fstab:
   file.touch:
     - name: /etc/fstab.{{ jail }}
     - require_in:
       - cmd: {{ jail }}_start
+
+###############
+# JAIL MOUNTS #
+###############
 
 {% for jail_mount in cfg.get('fstab', ()) %}
 
@@ -202,6 +220,10 @@ jail_root:
 
 {% endfor %}
 
+##############
+# START JAIL #
+##############
+
 {{ jail }}_start:
   cmd.run:
     - name: service jail onestart {{ jail }}
@@ -210,6 +232,10 @@ jail_root:
       - file: jail_etc_jail_conf
     - onchanges:
       - file: {{ jail }}_directory
+
+#####################
+# JAIL INIT SCRIPTS #
+#####################
 
 {% for init_script in cfg.init_scripts %}
 
