@@ -2,9 +2,13 @@
 
 {% for jail_name, jail_config in jails.instances.items() %}
 
-{% import_yaml "jails/defaults/" | path_join(jail_config.version, 'rc_conf.yaml') as rc_conf %}
+{% import_yaml "jails/defaults/" | path_join('{}.yaml'.format(jail_config.version)) as defaults %}
 
-{% do jail_config.update({'rc_conf': salt.slsutil.merge(rc_conf.rc_conf, jail_config.rc_conf|default({}))}) %}
+{% for key, params in defaults.items() %}
+{% do jail_config.update({key: salt.slsutil.merge(params, jail_config[key]|default({}))}) %}
+{% endfor %}
+
+{# {% do jail_config.update({'rc_conf': salt.slsutil.merge(rc_conf.rc_conf, jail_config.rc_conf|default({}))}) %} #}
 
 {% endfor %}
 
