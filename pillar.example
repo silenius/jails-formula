@@ -16,11 +16,12 @@ jails:
       salt:
         minion_id: pg11.lan
         master: salt.lan
+        pkg: py36-salt
       jail_conf: |
         $ip = 39;
         allow.sysvipc = 1;
       rc_conf:
-        foo_enable: "'YES'"
+        foo_enable: "YES"
       patches:
         - target: /etc/login.conf
           diff: patch-login.conf
@@ -84,7 +85,7 @@ jails:
       jail_conf: |
         $ip = 31;
       rc_conf:
-        some_daemon_enable: "'YES'"
+        some_daemon_enable: "YES"
         some_daemon_flags: "-foo -bar"
       patches:
         - target: /etc/login.conf
