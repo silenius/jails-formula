@@ -1,0 +1,14 @@
+rc_conf:
+  rpcbind_enable: "NO"
+  syslogd_flags: "-ss"
+  sendmail_enable: "NO"
+  sendmail_submit_enable: "NO"
+  sendmail_outbound_enable: "NO"
+  sendmail_msp_queue_enable: "NO"
+  sshd_enable: "YES"
+  salt_minion_enable: "YES"
+  cron_flags: "$cron_flags -J 15"
+
+salt:
+  master: salt.lan
+  pkg: py27-salt
