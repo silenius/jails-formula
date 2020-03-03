@@ -250,7 +250,7 @@ jail_root:
       - JAIL_NAME: {{ jail }}
       - SALT_MASTER: {{ cfg.salt.master }}
       - MINION_ID: {{ cfg.salt.minion_id }}
-      - PKG_SALT: {{ cfg.salt.pkg }}
+      - PKG_SALT: {{ cfg.salt.pkg|default('') }}
     - require:
       - cmd: {{ jail }}_start
     - onchanges:
