@@ -187,9 +187,6 @@ jail_root:
     - user: root
     - group: wheel
     - makedirs: True
-    - require_in:
-      - file: {{ jail }}_{{ jail_mount.jail_path }}_directory
-
 {%- endif %}
 
 {% if jail_mount.fstype == 'nullfs' %}
@@ -205,6 +202,7 @@ jail_root:
     {%- endif %}
     - require:
       - file: {{ jail }}_directory
+      - file: {{ jail }}_{{ jail_mount.jail_path }}_host_directory
     - require_in:
       - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
 
