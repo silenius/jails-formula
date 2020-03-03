@@ -1,7 +1,10 @@
 #!/bin/sh
 
+jexec "${JAIL_NAME}" pkg install pkg
+
+[ -z "${PKG_SALT}" ] && PKG_SALT="$(jexec ${JAIL_NAME} pkg search -q -x \"^py.*-salt\"|sort -ur|head -1)"
+
 jexec "${JAIL_NAME}" << EOF
-pkg install pkg
 pkg install ${PKG_SALT}
 pkg install ca_root_nss
 pkg lock -y ${PKG_SALT}
