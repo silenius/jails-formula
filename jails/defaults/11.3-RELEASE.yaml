@@ -8,4 +8,3 @@ rc_conf:
 
 salt:
   master: salt.lan
-  pkg: py36-salt
