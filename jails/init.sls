@@ -192,6 +192,8 @@ jail_root:
 
 {%- endif %}
 
+{% if jail_mount.fstype == 'nullfs' %}
+
 {{ jail }}_{{ jail_mount.jail_path }}_directory:
   file.directory:
     - name: {{ jail_mount.host_path }}
@@ -203,6 +205,10 @@ jail_root:
     {%- endif %}
     - require:
       - file: {{ jail }}_directory
+    - require_in:
+      - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
+
+{% endif %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_fstab:
   mount.mounted:
@@ -215,8 +221,6 @@ jail_root:
     - mount: False
     - require_in:
       - cmd: {{ jail }}_start
-    - require:
-      - file: {{ jail }}_{{ jail_mount.jail_path }}_directory
 
 {% endfor %}
 
