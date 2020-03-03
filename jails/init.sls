@@ -179,7 +179,7 @@ jail_root:
 
 {% for jail_mount in cfg.get('fstab', ()) %}
 
-{%- if not jails.get('use_zfs', True) %}
+{%- if not jails.get('use_zfs', True) and jail_mount.fstype == 'nullfs' %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_host_directory:
   file.directory:
@@ -187,9 +187,10 @@ jail_root:
     - user: root
     - group: wheel
     - makedirs: True
-{%- endif %}
+    - require_in:
+      - file: {{ jail }}_{{ jail_mount.jail_path }}_directory
 
-{% if jail_mount.fstype == 'nullfs' %}
+{%- endif %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_directory:
   file.directory:
@@ -202,11 +203,8 @@ jail_root:
     {%- endif %}
     - require:
       - file: {{ jail }}_directory
-      - file: {{ jail }}_{{ jail_mount.jail_path }}_host_directory
     - require_in:
       - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
-
-{% endif %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_fstab:
   mount.mounted:
