@@ -224,12 +224,18 @@ jail_root:
 # START JAIL #
 ##############
 
+{{ jail }}_jail_list:
+  cmd.run:
+    - name: sysrc jail_list+={{ jail }}
+    - cwd: /tmp
+
 {{ jail }}_start:
   cmd.run:
     - name: service jail onestart {{ jail }}
     - cwd: /tmp
     - require:
       - file: jail_etc_jail_conf
+      - cmd: {{ jail }}_jail_list
     - onchanges:
       - file: {{ jail }}_directory
 
