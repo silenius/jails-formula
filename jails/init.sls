@@ -195,9 +195,11 @@ jail_root:
 {{ jail }}_{{ jail_mount.jail_path }}_directory:
   file.directory:
     - name: {{ jail_mount.host_path }}
+    {% if not salt.mount.is_mounted(jail_mount.host_path) %}
     - user: {{ jail_mount.get('user', 'root') }}
     - group: {{ jail_mount.get('group', 'wheel') }}
     - mode: {{ jail_mount.get('mode', 755) }}
+    {% endif %}
     {%- if not jails.get('use_zfs', True) %}
     - makedirs: True
     {%- endif %}
