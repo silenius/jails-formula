@@ -14,10 +14,10 @@
         salt.slsutil.merge(defaults_arch,
             salt.slsutil.merge(defaults, jail_config)))) %}
 
-{# {% do jail_config.update({'rc_conf': salt.slsutil.merge(rc_conf.rc_conf, jail_config.rc_conf|default({}))}) %} #}
-
 {% endfor %}
 
+{#
 {% do salt.log.info('*******************************') %}
 {% do salt.log.info(jails) %}
 {% do salt.log.info('*******************************') %}
+#}
