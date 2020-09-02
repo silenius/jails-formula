@@ -267,5 +267,3 @@ jail_root:
 {% endfor %}  # INIT SCRIPTS
  
 {% endfor %}  # JAILS LIST
-
-

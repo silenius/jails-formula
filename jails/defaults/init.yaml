@@ -1,0 +1,13 @@
+salt:
+  master: salt.lan
+
+pkg:
+  FreeBSD.conf: |
+    FreeBSD: { enabled: no }
+
+arch: {{ salt.grains.get('osarch') }}
+
+present: true
+
+rc_conf:
+  salt_minion_enable: "YES"
