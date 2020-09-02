@@ -200,7 +200,7 @@ jail_root:
     - group: {{ jail_mount.get('group', 'wheel') }}
     - mode: {{ jail_mount.get('mode', 755) }}
     {% endif %}
-    {%- if not jails.get('use_zfs', True) %}
+    {%- if not jails.get('use_zfs', True) or jail_mount.fstype == 'nfs' %}
     - makedirs: True
     {%- endif %}
     - require:
