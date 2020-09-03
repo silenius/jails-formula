@@ -53,7 +53,7 @@ jail_root:
     - onchanges:
       - file: {{ jail }}_directory
     - onchanges_in:
-      - cmd: {{ jail }}_freebsd_update_fetch
+      - cmd: {{ jail }}_freebsd_update_fetch_install
     - watch_in:
       - file: jail_etc_jail_conf
 
@@ -132,8 +132,7 @@ jail_root:
     - onchanges:
       - cmd: {{ jail }}_set_base.txz
     - require_in:
-      - cmd: {{ jail }}_freebsd_update_fetch
-      - cmd: {{ jail }}_freebsd_update_install
+      - cmd: {{ jail }}_freebsd_update_fetch_install
 
 ####################
 # PKG REPOSITORIES #
