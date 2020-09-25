@@ -1,4 +1,4 @@
-{% set jails = salt.pillar.get('jails') %}
+{% from "jails/map.jinja" import jails with context %}
 
 # /etc/jail.conf
 

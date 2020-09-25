@@ -48,7 +48,7 @@ jail_root:
 
 {{ jail }}_set_{{ set }}:
   cmd.run:
-    - name: fetch {{ cfg.get('fetch_url', 'https://download.freebsd.org/ftp/releases/amd64/').rstrip('/') }}/{{ cfg.version }}/{{ set }} -4 -q -o - | tar -x -C {{ jails.root | path_join(jail) }} -f -
+    - name: fetch {{ cfg.get('fetch_url', 'https://download.freebsd.org/ftp/releases/' ~ cfg.arch).rstrip('/') ~ '/' ~ cfg.version ~ '/' ~ set }} -4 -q -o - | tar -x -C {{ jails.root | path_join(jail) }} -f -
     - cwd: /tmp
     - onchanges:
       - file: {{ jail }}_directory
