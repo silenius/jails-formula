@@ -2,7 +2,6 @@
 
 jails:
   root: /jails
-  jail_conf: /etc/jail.conf
   jail_conf_template: salt://jails/files/templates/jail.conf.jinja
   instances:
     pg11:

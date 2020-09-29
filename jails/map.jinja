@@ -1,23 +1,35 @@
+{% import_yaml "jails/defaults/host.yaml" as defaults_host %}
+{% import_yaml "jails/defaults/jails.yaml" as defaults_jails %}
+{% import_yaml "jails/defaults/archs.yaml" as defaults_archs %}
+{% import_yaml "jails/defaults/versions.yaml" as defaults_versions %}
+
 {% set jails = salt.pillar.get('jails') %}
 
-{# Start with defaults #}
-{% import_yaml "jails/defaults/init.yaml" as defaults %}
+{% set defaults = salt.slsutil.merge({
+    'host': defaults_host,
+    'jails': defaults_jails,
+    'archs': defaults_archs,
+    'versions': defaults_versions
+}, jails.lookup) %}
+
+{% do salt.log.info('*******************************') %}
+{% do salt.log.info(defaults) %}
+{% do salt.log.info('*******************************') %}
+
+{% do jails.update(salt.slsutil.merge(defaults.host, jails)) %}
 
 {% for jail_name, jail_config in jails.instances.items() %}
-
-{% import_yaml "jails/defaults/versions" | path_join('{}.yaml'.format(jail_config.version)) as defaults_version %}
-
-{% import_yaml "jails/defaults/archs" | path_join('{}.yaml'.format(jail_config.arch|default(defaults.arch))) as defaults_arch %}
-
-{% do jail_config.update(
-    salt.slsutil.merge(defaults_version,
-        salt.slsutil.merge(defaults_arch,
-            salt.slsutil.merge(defaults, jail_config)))) %}
-
+    {% do jail_config.update(salt.slsutil.merge(defaults.jails, jail_config)) %}
+    {% do jail_config.update(salt.slsutil.merge(defaults.archs[jail_config.arch], jail_config)) %}
+    {% do jail_config.update(salt.slsutil.merge(defaults.versions[jail_config.version], jail_config)) %}
+    {% if jail_config.flavours is defined and defaults.flavours is defined %}
+        {% for flavour in jail_config.flavours %}
+            {% do jail_config.update(salt.slsutil.merge(defaults.flavours[flavour], jail_config)) %}
+        {% endfor %}
+    {% endif %}
 {% endfor %}
 
-{#
 {% do salt.log.info('*******************************') %}
-{% do salt.log.info(jails) %}
+{% do salt.log.info(jails.instances.sandbox_121) %}
+{% do salt.log.info(jails.instances.sandbox_104) %}
 {% do salt.log.info('*******************************') %}
-#}

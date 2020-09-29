@@ -3,7 +3,7 @@
 include:
   - jails.jail_conf
   - jails.freebsd_update
-  {%- if salt.pillar.get('zfs:fs') %}
+  {%- if jails.use_zfs %}
   - zfs.fs
   {%- endif %}
 
@@ -16,7 +16,7 @@ jail_root:
     - group: wheel
     - require_in:
       - file: jail_etc_jail_conf
-    {% if salt.pillar.get('zfs:fs') %}
+    {% if jails.use_zfs %}
     - require:
       - sls: zfs.fs
     {% endif %}
@@ -34,7 +34,7 @@ jail_root:
     - mode: 600
     - user: root
     - group: wheel
-    {%- if not jails.get('use_zfs', True) %}
+    {%- if not jails.use_zfs %}
     - makedirs: True
     {%- endif %}
     - unless: 
@@ -178,7 +178,7 @@ jail_root:
 
 {% for jail_mount in cfg.get('fstab', ()) %}
 
-{%- if not jails.get('use_zfs', True) and jail_mount.fstype == 'nullfs' %}
+{%- if not jails.use_zfs and jail_mount.fstype == 'nullfs' %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_host_directory:
   file.directory:
@@ -199,7 +199,7 @@ jail_root:
     - group: {{ jail_mount.get('group', 'wheel') }}
     - mode: {{ jail_mount.get('mode', 755) }}
     {% endif %}
-    {%- if not jails.get('use_zfs', True) or jail_mount.fstype == 'nfs' %}
+    {%- if not jails.use_zfs or jail_mount.fstype == 'nfs' %}
     - makedirs: True
     {%- endif %}
     - require:

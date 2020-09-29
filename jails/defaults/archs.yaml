@@ -1,0 +1,7 @@
+amd64:
+  sets:
+    - base.txz
+    - lib32.txz
+i386:
+  sets:
+    - base.txz

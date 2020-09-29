@@ -1,0 +1,4 @@
+root: /jails
+use_zfs: {{ salt.grains.get('zfs_support') }}
+jail_conf: /etc/jail.conf
+jail_conf_template: salt://jails/files/templates/jail.conf.jinja
