@@ -12,10 +12,6 @@
     'versions': defaults_versions
 }, jails.lookup) %}
 
-{% do salt.log.info('*******************************') %}
-{% do salt.log.info(defaults) %}
-{% do salt.log.info('*******************************') %}
-
 {% do jails.update(salt.slsutil.merge(defaults.host, jails)) %}
 
 {% for jail_name, jail_config in jails.instances.items() %}
@@ -29,7 +25,8 @@
     {% endif %}
 {% endfor %}
 
+{#
 {% do salt.log.info('*******************************') %}
-{% do salt.log.info(jails.instances.sandbox_121) %}
-{% do salt.log.info(jails.instances.sandbox_104) %}
+{% do salt.log.info(jails) %}
 {% do salt.log.info('*******************************') %}
+#}
