@@ -5,6 +5,3 @@ rc_conf:
   salt_minion_enable: "YES"
 salt:
   master: salt.lan
-pkg:
-  FreeBSD.conf: |
-    FreeBSD: { enabled: no }

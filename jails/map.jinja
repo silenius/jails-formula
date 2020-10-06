@@ -2,6 +2,7 @@
 {% import_yaml "jails/defaults/jails.yaml" as defaults_jails %}
 {% import_yaml "jails/defaults/archs.yaml" as defaults_archs %}
 {% import_yaml "jails/defaults/versions.yaml" as defaults_versions %}
+{% import_yaml "jails/defaults/flavours.yaml" as defaults_flavours %}
 
 {% set jails = salt.pillar.get('jails') %}
 
@@ -9,7 +10,8 @@
     'host': defaults_host,
     'jails': defaults_jails,
     'archs': defaults_archs,
-    'versions': defaults_versions
+    'versions': defaults_versions,
+    'flavours': defaults_flavours
 }, jails.lookup) %}
 
 {% do jails.update(salt.slsutil.merge(defaults.host, jails)) %}

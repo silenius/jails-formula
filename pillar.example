@@ -1,20 +1,27 @@
 # vim: syntax=yaml
 
 jails:
-  root: /jails
-  jail_conf_template: salt://jails/files/templates/jail.conf.jinja
+  lookup:
+    host:
+      jail_conf_template: salt://jails/files/templates/jail.conf.jinja
+    jails:
+      salt:
+        master: override_salt_master.lan
+    flavours:
+      pkg-my_repo_121:
+        myrepo.conf: |
+          myrepo: {
+            url: "http://some.poudriere.host/packages/12_1amd64-b_2019Q4-server",
+            enabled: yes
+          }
   instances:
     pg11:
       present: true
       version: 11.2-RELEASE
       init_scripts: 
         - salt://jails/files/scripts/jail_init.sh
-      sets:
-        - base.txz
-        - lib32.txz
       salt:
         minion_id: pg11.lan
-        master: salt.lan
         pkg: py36-salt
       jail_conf: |
         $ip = 39;
@@ -25,9 +32,9 @@ jails:
         - target: /etc/login.conf
           diff: patch-login.conf
           hash: 07ebd5eaebb5f9bb87e769356bec62fb
+      flavours:
+        - pkg-no-freebsd
       pkg:
-        FreeBSD.conf: |
-          FreeBSD: { enabled: no }
         myrepo.conf: |
           myrepo: {
             url: "http://some.poudriere.host/packages/11_2amd64-b_2019Q1-server",
@@ -59,28 +66,20 @@ jails:
       version: 10.4-RELEASE
       init_scripts: 
         - salt://jails/files/scripts/jail_init.sh
-      sets:
-        - base.txz
-        - lib32.txz
       salt:
         minion_id: oldstuff.lan
-        master: salt.lan
+        master: another_salt_master.lan
         pkg: py27-salt
       jail_conf: |
         $ip = 39;
         depend = pg11;
     anotherjail:
-      present: true
-      version: 12.0-RELEASE
+      version: 12.1-RELEASE
       init_scripts: 
         - salt://jails/files/scripts/jail_init.sh
         - salt://jails/files/scripts/another_script.sh
-      sets:
-        - base.txz
-        - lib32.txz
       salt:
         minion_id: anotherjail.lan
-        master: salt.lan
       jail_conf: |
         $ip = 31;
       rc_conf:
@@ -95,11 +94,6 @@ jails:
           host_path: /jails/anotherjail/data 
           fstype: nullfs
           opts: rw 
-      pkg:
-        FreeBSD.conf: |
-          FreeBSD: { enabled: no }
-        myrepo.conf: |
-          myrepo: {
-            url: "http://some.poudriere.host/packages/12_0amd64-b_2019Q3-server",
-            enabled: yes
-          }
+      flavours:
+        - pkg-no-freebsd
+        - pkg-my_repo_121
