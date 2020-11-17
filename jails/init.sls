@@ -21,7 +21,7 @@ jail_root:
       - sls: zfs.fs
     {% endif %}
 
-{% for jail, cfg in jails.instances.items() %}
+{% for jail, cfg in jails.instances.items() if cfg.present %}
 
 #######################
 # JAIL ROOT DIRECTORY #

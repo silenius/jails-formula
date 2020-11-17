@@ -2,7 +2,7 @@
 
 {% from "jails/map.jinja" import jails with context %}
 
-{% for jail, cfg in jails.instances.items() %}
+{% for jail, cfg in jails.instances.items() if cfg.present %}
 
 {{ jail }}_freebsd_update_fetch_install:
   cmd.run:
