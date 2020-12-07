@@ -178,6 +178,8 @@ jail_root:
 
 {% for jail_mount in cfg.get('fstab', ()) %}
 
+{% if jail_mount.present|default(True) %}
+
 {%- if not jails.use_zfs and jail_mount.fstype == 'nullfs' %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_host_directory:
@@ -206,8 +208,6 @@ jail_root:
       - file: {{ jail }}_directory
     - require_in:
       - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
-
-{% if jail_mount.present|default(True) %}
 
 {{ jail }}_{{ jail_mount.jail_path }}_fstab:
   mount.mounted:
