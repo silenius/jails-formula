@@ -207,6 +207,8 @@ jail_root:
     - require_in:
       - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
 
+{% if jail_mount.present|default(True) %}
+
 {{ jail }}_{{ jail_mount.jail_path }}_fstab:
   mount.mounted:
     - name: {{ jail_mount.host_path }}
@@ -218,6 +220,19 @@ jail_root:
     - mount: False
     - require_in:
       - cmd: {{ jail }}_start
+
+{% else %}
+
+{{ jail }}_{{ jail_mount.jail_path }}_fstab:
+  mount.unmounted:
+    - name: {{ jail_mount.host_path }}
+    - config: /etc/fstab.{{ jail }}
+    - device: {{ jail_mount.jail_path }}
+    - persist: True
+    - require_in:
+      - cmd: {{ jail }}_start
+
+{% endif %}
 
 {% endfor %}
 
