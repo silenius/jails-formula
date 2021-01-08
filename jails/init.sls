@@ -21,6 +21,11 @@ jail_root:
       - sls: zfs.fs
     {% endif %}
 
+jail_enable:
+  sysrc.managed:
+    - name: jail_enable
+    - value: "YES"
+
 {% for jail, cfg in jails.instances.items() if cfg.present %}
 
 #######################
