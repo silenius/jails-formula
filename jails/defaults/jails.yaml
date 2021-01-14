@@ -1,4 +1,5 @@
 present: true
+boot_start: true
 arch: {{ salt.grains.get('osarch') }}
 version: {{ salt.grains.get('osrelease') ~ '-RELEASE' }}
 rc_conf:

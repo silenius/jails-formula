@@ -26,7 +26,13 @@ jail_enable:
     - name: jail_enable
     - value: "YES"
 
-{% for jail, cfg in jails.instances.items() if cfg.present %}
+{% for jail, cfg in jails.instances.items() %}
+
+{% if cfg.present %}
+
+###################
+# JAIL IS PRESENT #
+###################
 
 #######################
 # JAIL ROOT DIRECTORY #
@@ -245,10 +251,29 @@ jail_enable:
 # START JAIL #
 ##############
 
+{% if cfg.boot_start %}
+
+# Start on boot, add to rc.conf jail_list
+
 {{ jail }}_jail_list:
   cmd.run:
     - name: sysrc jail_list+={{ jail }}
     - cwd: /tmp
+    - unless:
+      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
+
+{% else %}
+
+# Do not start on boot, remove from rc.conf jail_list
+
+{{ jail }}_jail_list:
+  cmd.run:
+    - name: sysrc jail_list-={{ jail }}
+    - cwd: /tmp
+    - onlyif:
+      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
+
+{% endif %}
 
 {{ jail }}_start:
   cmd.run:
@@ -284,5 +309,32 @@ jail_enable:
       - file: {{ jail }}_directory
 
 {% endfor %}  # INIT SCRIPTS
+
+{% else %}
+
+##################
+# JAIL IS ABSENT #
+##################
+
+#############
+# STOP JAIL #
+#############
+
+{{ jail }}_stop:
+  cmd.run:
+    - name: service jail onestop {{ jail }}
+    - cwd: /tmp
+    - require_in:
+      - file: jail_etc_jail_conf
+      - cmd: {{ jail }}_jail_list
+
+{{ jail }}_jail_list:
+  cmd.run:
+    - name: sysrc jail_list-={{ jail }}
+    - cwd: /tmp
+    - onlyif:
+      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
+
+{% endif %}  # IF PRESENT
  
 {% endfor %}  # JAILS LIST
