@@ -182,6 +182,10 @@ jail_enable:
     - name: /etc/fstab.{{ jail }}
     - require_in:
       - cmd: {{ jail }}_start
+    - unless:
+      - fun: file.file_exists
+        args:
+          - /etc/fstab.{{ jail }}
 
 ###############
 # JAIL MOUNTS #
