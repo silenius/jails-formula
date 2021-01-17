@@ -339,6 +339,12 @@ jail_enable:
     - onlyif:
       - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
 
+{{ jail }}_fstab:
+  file.absent:
+    - name: /etc/fstab.{{ jail }}
+    - require:
+      - cmd: {{ jail }}_stop
+
 {% endif %}  # IF PRESENT
  
 {% endfor %}  # JAILS LIST
