@@ -197,21 +197,21 @@ jail_enable:
 
 {%- if not jails.use_zfs and jail_mount.fstype == 'nullfs' %}
 
-{{ jail }}_{{ jail_mount.jail_path }}_host_directory:
+{{ jail }}_{{ jail_mount.device }}_host_directory:
   file.directory:
-    - name: {{ jail_mount.jail_path }}
+    - name: {{ jail_mount.device }}
     - user: root
     - group: wheel
     - makedirs: True
     - require_in:
-      - file: {{ jail }}_{{ jail_mount.jail_path }}_directory
+      - file: {{ jail }}_{{ jail_mount.device }}_directory
 
 {%- endif %}
 
-{{ jail }}_{{ jail_mount.jail_path }}_directory:
+{{ jail }}_{{ jail_mount.device }}_directory:
   file.directory:
-    - name: {{ jail_mount.host_path }}
-    {% if not salt.mount.is_mounted(jail_mount.host_path) %}
+    - name: {{ jail_mount.mount_point }}
+    {% if not salt.mount.is_mounted(jail_mount.mount_point) %}
     - user: {{ jail_mount.get('user', 'root') }}
     - group: {{ jail_mount.get('group', 'wheel') }}
     - mode: {{ jail_mount.get('mode', 755) }}
@@ -222,13 +222,13 @@ jail_enable:
     - require:
       - file: {{ jail }}_directory
     - require_in:
-      - mount: {{ jail }}_{{ jail_mount.jail_path }}_fstab
+      - mount: {{ jail }}_{{ jail_mount.device }}_fstab
 
-{{ jail }}_{{ jail_mount.jail_path }}_fstab:
+{{ jail }}_{{ jail_mount.device }}_fstab:
   mount.mounted:
-    - name: {{ jail_mount.host_path }}
+    - name: {{ jail_mount.mount_point }}
     - config: /etc/fstab.{{ jail }}
-    - device: {{ jail_mount.jail_path }}
+    - device: {{ jail_mount.device }}
     - fstype: {{ jail_mount.fstype }}
     - opts: {{ jail_mount.opts }}
     - persist: True
@@ -238,11 +238,11 @@ jail_enable:
 
 {% else %}
 
-{{ jail }}_{{ jail_mount.jail_path }}_fstab:
+{{ jail }}_{{ jail_mount.device }}_fstab:
   mount.unmounted:
-    - name: {{ jail_mount.host_path }}
+    - name: {{ jail_mount.mount_point }}
     - config: /etc/fstab.{{ jail }}
-    - device: {{ jail_mount.jail_path }}
+    - device: {{ jail_mount.device }}
     - persist: True
     - require_in:
       - cmd: {{ jail }}_start
