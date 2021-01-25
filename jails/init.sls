@@ -177,79 +177,68 @@ jail_enable:
 # JAIL FSTAB #
 ##############
 
-{{ jail }}_fstab:
-  file.touch:
-    - name: /etc/fstab.{{ jail }}
-    - require_in:
-      - cmd: {{ jail }}_start
-    - unless:
-      - fun: file.file_exists
-        args:
-          - /etc/fstab.{{ jail }}
+{% for fstab in cfg.get('fstab', ()) %}
 
-###############
-# JAIL MOUNTS #
-###############
+{%- if fstab.fstype == 'nullfs' %}
 
-{% for jail_mount in cfg.get('fstab', ()) %}
+# We mount_nullfs a directory from the HOST, ensure that the directory exists.
+# If you need a separate ZFS dataset, ensure that it is created before.
 
-{% if jail_mount.present|default(True) %}
-
-{%- if not jails.use_zfs and jail_mount.fstype == 'nullfs' %}
-
-{{ jail }}_{{ jail_mount.device }}_host_directory:
+{{ jail }}_{{ fstab.device }}_fstab_device:
   file.directory:
-    - name: {{ jail_mount.device }}
-    - user: root
-    - group: wheel
+    - name: {{ fstab.device }}
+    - user: {{ fstab.get('user', 'root') }}
+    - group: {{ fstab.get('group', 'wheel') }}
+    - mode: {{ fstab.get('mode', 755) }}
     - makedirs: True
     - require_in:
-      - file: {{ jail }}_{{ jail_mount.device }}_directory
+      - file: {{ jail }}_fstab
+    - require:
+      - file: {{ jail }}_directory
+    {% if jails.use_zfs %}
+      - sls: zfs.fs
+    {% endif %}
 
 {%- endif %}
 
-{{ jail }}_{{ jail_mount.device }}_directory:
+# The mountpoint directory in the jail.
+
+{{ jail }}_{{ fstab.device }}_fstab_mount_point:
   file.directory:
-    - name: {{ jail_mount.mount_point }}
-    {% if not salt.mount.is_mounted(jail_mount.mount_point) %}
-    - user: {{ jail_mount.get('user', 'root') }}
-    - group: {{ jail_mount.get('group', 'wheel') }}
-    - mode: {{ jail_mount.get('mode', 755) }}
-    {% endif %}
-    {%- if jail_mount.fstype in ('nfs', 'nullfs') %}
+    - name: {{ fstab.mount_point }}
+    - user: {{ fstab.get('user', 'root') }}
+    - group: {{ fstab.get('group', 'wheel') }}
+    - mode: {{ fstab.get('mode', 755) }}
+    {%- if fstab.fstype in ('nfs', 'nullfs') %}
     - makedirs: True
     {%- endif %}
     - require:
       - file: {{ jail }}_directory
     - require_in:
-      - mount: {{ jail }}_{{ jail_mount.device }}_fstab
-
-{{ jail }}_{{ jail_mount.device }}_fstab:
-  mount.mounted:
-    - name: {{ jail_mount.mount_point }}
-    - config: /etc/fstab.{{ jail }}
-    - device: {{ jail_mount.device }}
-    - fstype: {{ jail_mount.fstype }}
-    - opts: {{ jail_mount.opts }}
-    - persist: True
-    - mount: False
-    - require_in:
-      - cmd: {{ jail }}_start
-
-{% else %}
-
-{{ jail }}_{{ jail_mount.device }}_fstab:
-  mount.unmounted:
-    - name: {{ jail_mount.mount_point }}
-    - config: /etc/fstab.{{ jail }}
-    - device: {{ jail_mount.device }}
-    - persist: True
-    - require_in:
-      - cmd: {{ jail }}_start
-
-{% endif %}
+      - file: {{ jail }}_fstab
 
 {% endfor %}
+
+{{ jail }}_fstab:
+  file.managed:
+    - name: /etc/fstab.{{ jail }}
+    - user: root
+    - group: wheel
+    - mode: 644
+    - contents: |
+        # File managed by Saltstack, do not modify!
+        {% for fstab in cfg.get('fstab', ()) %}
+        {{ fstab.device }} {{ fstab.mount_point }} {{ fstab.fstype }} {{ fstab.opts }} 0 0
+        {%- endfor %}
+    - require_in:
+      - cmd: {{ jail }}_start
+
+{{ jail }}_fstab_stop:
+  cmd.run:
+    - name: service jail onestop {{ jail }}
+    - cwd: /tmp
+    - prereq:
+      - file: {{ jail }}_fstab
 
 ##############
 # START JAIL #
@@ -288,6 +277,7 @@ jail_enable:
       - cmd: {{ jail }}_jail_list
     - onchanges:
       - file: {{ jail }}_directory
+      - cmd: {{ jail }}_fstab_stop
 
 #####################
 # JAIL INIT SCRIPTS #
