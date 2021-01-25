@@ -206,9 +206,11 @@ jail_enable:
 {{ jail }}_{{ fstab.device }}_fstab_mount_point:
   file.directory:
     - name: {{ fstab.mount_point }}
+    {% if not salt.mount.is_mounted(jail_mount.mount_point) %}
     - user: {{ fstab.get('user', 'root') }}
     - group: {{ fstab.get('group', 'wheel') }}
     - mode: {{ fstab.get('mode', 755) }}
+    {% endif %}
     {%- if fstab.fstype in ('nfs', 'nullfs') %}
     - makedirs: True
     {%- endif %}
