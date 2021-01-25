@@ -41,21 +41,21 @@ jails:
             enabled: yes
           }
       fstab:
-        - jail_path: /data/jails/pg11
-          host_path: /jails/pg11/data 
+        - device: /data/jails/pg11
+          mount_point: /jails/pg11/data 
           fstype: nullfs
           opts: rw 
 
-        - jail_path: /data/jails/pg11/data11
-          host_path: /jails/pg11/data/data11 
+        - device: /data/jails/pg11/data11
+          mount_point: /jails/pg11/data/data11 
           fstype: nullfs
           opts: rw 
           user: 770
           group: 770
           mode: 700
 
-        - jail_path: /data/jails/pg11/backups
-          host_path: /jails/pg11/data/backups 
+        - device: /data/jails/pg11/backups
+          mount_point: /jails/pg11/data/backups 
           fstype: nullfs
           opts: rw 
           user: 770
@@ -90,8 +90,8 @@ jails:
           diff: patch-login.conf
           hash: 07ebd5eaebb5f9bb87e769356bec62fb
       fstab:
-        - jail_path: /data/jails/anotherjail
-          host_path: /jails/anotherjail/data 
+        - device: /data/jails/anotherjail
+          mount_point: /jails/anotherjail/data 
           fstype: nullfs
           opts: rw 
       flavours:
