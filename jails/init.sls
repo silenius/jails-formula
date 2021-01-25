@@ -239,6 +239,10 @@ jail_enable:
     - cwd: /tmp
     - prereq:
       - file: {{ jail }}_fstab
+    - onlyif:
+      - fun: jail.status
+        args:
+          - {{ jail }}
 
 ##############
 # START JAIL #
