@@ -99,6 +99,8 @@ jail_enable:
     - require:
       - file: {{ jail }}_rc_conf
       - file: {{ jail }}_directory
+    - onchanges:
+      - file: {{ jail }}_directory
 
 {% endfor %}  # RC_CONF
 
