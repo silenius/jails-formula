@@ -104,6 +104,29 @@ jail_enable:
 
 {% endfor %}  # RC_CONF
 
+#########################
+# JAIL /etc/resolv.conf #
+#########################
+
+{% if cfg.resolv_conf is defined %} 
+
+{{ jail }}_resolv_conf:
+  file.managed:
+    - name: {{ jails.root | path_join(jail, 'etc', 'resolv.conf') }}
+    - user: root
+    - group: wheel
+    - mode: 644
+    - content: |
+        {{ cfg.resolv_conf|yaml }}
+    - require_in:
+      - cmd: {{ jail }}_start
+    - require:
+      - file: {{ jail }}_directory
+    - onchanges:
+      - file: {{ jail }}_directory
+
+{% endif %}
+
 ###########
 # PATCHES #
 ###########
