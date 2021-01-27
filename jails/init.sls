@@ -116,8 +116,8 @@ jail_enable:
     - user: root
     - group: wheel
     - mode: 644
-    - content: |
-        {{ cfg.resolv_conf|yaml }}
+    - contents: |
+        {{ cfg.resolv_conf|indent(8) }}
     - require_in:
       - cmd: {{ jail }}_start
     - require:
