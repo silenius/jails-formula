@@ -10,6 +10,15 @@
     salt_minion_enable: "YES"
     cron_flags: "$cron_flags -J 15"
 
+11.2-RELEASE:
+  rc_conf:
+    rpcbind_enable: "NO"
+    syslogd_flags: "-ss"
+    sendmail_enable: "NONE"
+    sshd_enable: "YES"
+    salt_minion_enable: "YES"
+    cron_flags: "$cron_flags -J 15"
+
 11.3-RELEASE:
   rc_conf:
     rpcbind_enable: "NO"
