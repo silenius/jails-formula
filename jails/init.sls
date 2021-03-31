@@ -204,6 +204,8 @@ jail_enable:
 
 {% for fstab in cfg.get('fstab', ()) %}
 
+{% if fstab.get('present', True) %}
+
 {%- if fstab.fstype == 'nullfs' %}
 
 # We mount_nullfs a directory from the HOST, ensure that the directory exists.
@@ -244,6 +246,8 @@ jail_enable:
     - require_in:
       - file: {{ jail }}_fstab
 
+{% endif %}  # fstab.present
+
 {% endfor %}
 
 {{ jail }}_fstab:
@@ -254,7 +258,7 @@ jail_enable:
     - mode: 644
     - contents: |
         # File managed by Saltstack, do not modify!
-        {% for fstab in cfg.get('fstab', ()) %}
+        {% for fstab in cfg.get('fstab', ()) if fstab.get('present', True) %}
         {{ fstab.device }} {{ fstab.mount_point }} {{ fstab.fstype }} {{ fstab.opts }} 0 0
         {%- endfor %}
     - require_in:
