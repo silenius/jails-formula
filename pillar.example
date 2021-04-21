@@ -9,11 +9,10 @@ jails:
         master: override_salt_master.lan
     flavours:
       pkg-my_repo_121:
-        myrepo.conf: |
-          myrepo: {
-            url: "http://some.poudriere.host/packages/12_1amd64-b_2019Q4-server",
+        pkg:
+          pkg-my_repo_121:
+            url: "http://some.poudriere.host/packages/12_1amd64-b_2019Q4-server"
             enabled: yes
-          }
   instances:
     pg11:
       present: true
@@ -35,11 +34,15 @@ jails:
       flavours:
         - pkg-no-freebsd
       pkg:
-        myrepo.conf: |
-          myrepo: {
-            url: "http://some.poudriere.host/packages/11_2amd64-b_2019Q1-server",
-            enabled: yes
-          }
+        FreeBSD:
+          enabled: no
+        myrepo:
+          url: "http://some.poudriere.host/packages/11_2amd64-b_2019Q1-server",
+          enabled: yes
+        myotherrepo:
+          url: "http://some.poudriere.host/packages/11_2amd64-b_2019Q4-server",
+          enabled: yes
+          priority: 10
       fstab:
         - device: /data/jails/pg11
           mount_point: /jails/pg11/data 

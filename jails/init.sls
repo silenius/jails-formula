@@ -184,15 +184,26 @@ jail_enable:
     - onchanges:
       - file: {{ jail }}_directory
 
-{% for repo in cfg.get('pkg', {}) %}
+{% for rname, rconfig in cfg.get('pkg', {}).values() %}
 
-{{ jail }}_pkg_repo_{{ repo }}:
+{{ jail }}_pkg_repo_{{ rname }}:
   file.managed:
-    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos', repo) }}
+    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos', rname ~ '.conf') }}
     - user: root
     - group: wheel
     - mode: 644
-    - contents_pillar: jails:instances:{{ jail }}:pkg:{{ repo }}
+    - contents: |
+        {{ rname }}: {
+          {% for rkey, rvalue in rconfig.values() %}
+            {% if rkey in ('url', 'mirror_type', 'signature_type', 'pubkey', 'fingerprints') %}
+              {{ rkey }}: "{{ rvalue.strip('"') }}"
+            {% elif rkey in ('ip_version', 'priority') %}
+              {{ rkey }}: rvalue
+            {% elif rkey in ('enabled', ) %}
+              {{ rkey }}: {{ 'yes' if rvalue else 'no' }}
+            {% endif %}
+          {% endfor %}
+        }
     - onchanges:
       - file: {{ jail }}_pkg_repos
 
