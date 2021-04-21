@@ -184,7 +184,7 @@ jail_enable:
     - onchanges:
       - file: {{ jail }}_directory
 
-{% for rname, rconfig in cfg.get('pkg', {}).values() %}
+{% for rname, rconfig in cfg.get('pkg', {}).items() %}
 
 {{ jail }}_pkg_repo_{{ rname }}:
   file.managed:
@@ -194,15 +194,15 @@ jail_enable:
     - mode: 644
     - contents: |
         {{ rname }}: {
-          {% for rkey, rvalue in rconfig.values() %}
-            {% if rkey in ('url', 'mirror_type', 'signature_type', 'pubkey', 'fingerprints') %}
-              {{ rkey }}: "{{ rvalue.strip('"') }}"
-            {% elif rkey in ('ip_version', 'priority') %}
-              {{ rkey }}: rvalue
-            {% elif rkey in ('enabled', ) %}
-              {{ rkey }}: {{ 'yes' if rvalue else 'no' }}
-            {% endif %}
-          {% endfor %}
+          {%- for rkey, rvalue in rconfig.items() %}
+            {%- if rkey in ('url', 'mirror_type', 'signature_type', 'pubkey', 'fingerprints') %}
+              {{ rkey }}: "{{ rvalue.strip('"') }}",
+            {%- elif rkey in ('ip_version', 'priority') %}
+              {{ rkey }}: rvalue,
+            {%- elif rkey in ('enabled', ) %}
+              {{ rkey }}: {{ 'yes' if rvalue else 'no' }},
+            {%- endif %}
+          {%- endfor %}
         }
     - onchanges:
       - file: {{ jail }}_pkg_repos

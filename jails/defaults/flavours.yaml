@@ -1,4 +1,4 @@
 pkg-no-freebsd:
   pkg:
-    FreeBSD.conf: |
-      FreeBSD: { enabled: no }
+    FreeBSD:
+      enabled: no
