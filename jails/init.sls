@@ -198,7 +198,7 @@ jail_enable:
             {%- if rkey in ('url', 'mirror_type', 'signature_type', 'pubkey', 'fingerprints') %}
               {{ rkey }}: "{{ rvalue.strip('"') }}",
             {%- elif rkey in ('ip_version', 'priority') %}
-              {{ rkey }}: rvalue,
+              {{ rkey }}: {{ rvalue }},
             {%- elif rkey in ('enabled', ) %}
               {{ rkey }}: {{ 'yes' if rvalue else 'no' }},
             {%- endif %}
