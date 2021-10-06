@@ -60,3 +60,11 @@
     sendmail_enable: "NONE"
     sshd_enable: "YES"
     cron_flags: "$cron_flags -J 15"
+
+13.0-RELEASE:
+  rc_conf:
+    rpcbind_enable: "NO"
+    syslogd_flags: "-ss"
+    sendmail_enable: "NONE"
+    sshd_enable: "YES"
+    cron_flags: "$cron_flags -J 15"
