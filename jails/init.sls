@@ -49,7 +49,7 @@ jail_enable:
     - makedirs: True
     {%- endif %}
     - unless: 
-      - ls -A {{ jails.root | path_join(jail) }} | grep -q .
+      - test -f {{ jails.root | path_join(jail, '.saltstack') }}
 
 ########
 # SETS #
