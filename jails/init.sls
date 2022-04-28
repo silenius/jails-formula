@@ -367,6 +367,10 @@ jail_enable:
     - require_in:
       - file: jail_etc_jail_conf
       - cmd: {{ jail }}_jail_list
+    - onlyif:
+      - fun: jail.status
+        args:
+          - {{ jail }}
 
 {{ jail }}_jail_list:
   cmd.run:
@@ -380,6 +384,29 @@ jail_enable:
     - name: /etc/fstab.{{ jail }}
     - require:
       - cmd: {{ jail }}_stop
+
+{% if jail.purge_if_absent|default(False) %}
+
+{% if jails.use_zfs %}
+
+{% else %}
+
+{{ jail }}_chflags_noschg:
+  cmd.run:
+    - name: /bin/chflags -R noschg {{ jails.root | path_join(jail) }}
+    - cwd: /tmp
+    - require:
+      - cmd: {{ jail }}_stop
+
+{{ jail }}_remove_directory:
+  file.absent:
+    - name: {{ jails.root | path_join(jail) }}
+    - require:
+      - cmd: {{ jail }}_chflags_noschg
+
+{% endif %}  # jails.use_zfs
+
+{% endif %}  # jail.purge_if_absent
 
 {% endif %}  # IF PRESENT
  
