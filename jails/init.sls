@@ -385,7 +385,7 @@ jail_enable:
     - require:
       - cmd: {{ jail }}_stop
 
-{% if jail.purge_if_absent|default(False) %}
+{% if cfg.purge_if_absent|default(False) %}
 
 {% if jails.use_zfs %}
 
