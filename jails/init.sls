@@ -67,6 +67,8 @@ jail_enable:
       - cmd: {{ jail }}_freebsd_update_fetch_install
     - watch_in:
       - file: jail_etc_jail_conf
+    - require_in:
+      - file: {{ jail }}_rc_conf
 
 {% endfor %}  # SETS
 
@@ -82,10 +84,6 @@ jail_enable:
     - user: root
     - group: wheel
     - mode: 644
-    - require:
-      {% for set in cfg.sets %}
-      - cmd: {{ jail }}_set_{{ set }}
-      {% endfor %}
 
 {% for rc_param, rc_value in cfg.rc_conf.items() %}
 
@@ -140,14 +138,31 @@ jail_enable:
     - onchanges:
       - file: {{ jail }}_directory
 
+# /etc/login.conf
+
 {% if patch.target == '/etc/login.conf' %}
 
 {{ jail }}_cap_mkdb_{{ loop.index }}:
   cmd.run:
-    - name: cap_mkdb {{ jail.root | path_join('etc', 'login.conf') }} 
+    - name: /usr/sbin/jexec {{ jail }} cap_mkdb /etc/login.conf 
     - cwd: {{ jail.root }} 
     - onchanges:
       - file: {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}
+    - require:
+      - cmd: {{ jail }}_start
+
+# /etc/aliases
+
+{% elif patch.target == '/etc/aliases' %}
+
+{{ jail }}_newaliases_{{ loop.index }}:
+  cmd.run:
+    - name: /usr/sbin/jexec {{ jail }} newaliases 
+    - cwd: {{ jail.root }} 
+    - onchanges:
+      - file: {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}
+    - require:
+      - cmd: {{ jail }}_start
 
 {% endif %}
 

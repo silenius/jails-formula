@@ -1,4 +1,5 @@
 present: true
+method: fetch
 boot_start: true
 purge_if_absent: false
 arch: {{ salt.grains.get('osarch') }}
