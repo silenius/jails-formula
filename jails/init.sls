@@ -40,7 +40,7 @@ jail_enable:
 
 {{ jail }}_directory:
   file.managed:
-    - name: {{ jails.root | path_join(jail, '.saltstack') }}
+    - name: {{ cfg.root | path_join('.saltstack') }}
     - contents_pillar: jails:instances:{{ jail }}:version
     - mode: 600
     - user: root
@@ -49,7 +49,7 @@ jail_enable:
     - makedirs: True
     {%- endif %}
     - unless: 
-      - test -f {{ jails.root | path_join(jail, '.saltstack') }}
+      - test -f {{ cfg.root | path_join('.saltstack') }}
 
 ########
 # SETS #
@@ -59,7 +59,7 @@ jail_enable:
 
 {{ jail }}_set_{{ set }}:
   cmd.run:
-    - name: fetch {{ cfg.get('fetch_url', 'https://download.freebsd.org/ftp/releases/' ~ cfg.arch).rstrip('/') ~ '/' ~ cfg.version ~ '/' ~ set }} -4 -q -o - | tar -x -C {{ jails.root | path_join(jail) }} -f -
+    - name: fetch {{ cfg.get('fetch_url', 'https://download.freebsd.org/ftp/releases/' ~ cfg.arch).rstrip('/') ~ '/' ~ cfg.version ~ '/' ~ set }} -4 -q -o - | tar -x -C {{ cfg.root }} -f -
     - cwd: /tmp
     - onchanges:
       - file: {{ jail }}_directory
@@ -67,6 +67,8 @@ jail_enable:
       - cmd: {{ jail }}_freebsd_update_fetch_install
     - watch_in:
       - file: jail_etc_jail_conf
+    - require_in:
+      - file: {{ jail }}_rc_conf
 
 {% endfor %}  # SETS
 
@@ -78,14 +80,10 @@ jail_enable:
 
 {{ jail }}_rc_conf:
   file.managed:
-    - name: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }}
+    - name: {{ cfg.root | path_join('etc', 'rc.conf') }}
     - user: root
     - group: wheel
     - mode: 644
-    - require:
-      {% for set in cfg.sets %}
-      - cmd: {{ jail }}_set_{{ set }}
-      {% endfor %}
 
 {% for rc_param, rc_value in cfg.rc_conf.items() %}
 
@@ -93,7 +91,7 @@ jail_enable:
   sysrc.managed:
     - name: {{ rc_param }}
     - value: {{ rc_value }}
-    - file: {{ jails.root | path_join(jail, 'etc', 'rc.conf') }}
+    - file: {{ cfg.root | path_join('etc', 'rc.conf') }}
     - require_in:
       - cmd: {{ jail }}_start
     - require:
@@ -112,7 +110,7 @@ jail_enable:
 
 {{ jail }}_resolv_conf:
   file.managed:
-    - name: {{ jails.root | path_join(jail, 'etc', 'resolv.conf') }}
+    - name: {{ cfg.root | path_join('etc', 'resolv.conf') }}
     - user: root
     - group: wheel
     - mode: 644
@@ -135,19 +133,36 @@ jail_enable:
 
 {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}:
   file.patch:
-    - name: {{ jails.root | path_join(jail, patch.target) }} 
+    - name: {{ cfg.root | path_join(patch.target) }} 
     - source: salt://jails/files/patches/{{ cfg.version | path_join(patch.diff) }}
     - onchanges:
       - file: {{ jail }}_directory
+
+# /etc/login.conf
 
 {% if patch.target == '/etc/login.conf' %}
 
 {{ jail }}_cap_mkdb_{{ loop.index }}:
   cmd.run:
-    - name: cap_mkdb {{ jails.root | path_join(jail, 'etc', 'login.conf') }} 
-    - cwd: {{ jails.root | path_join(jail) }} 
+    - name: /usr/sbin/jexec {{ jail }} cap_mkdb /etc/login.conf 
+    - cwd: {{ cfg.root }} 
     - onchanges:
       - file: {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}
+    - require:
+      - cmd: {{ jail }}_start
+
+# /etc/aliases
+
+{% elif patch.target == '/etc/aliases' %}
+
+{{ jail }}_newaliases_{{ loop.index }}:
+  cmd.run:
+    - name: /usr/sbin/jexec {{ jail }} newaliases 
+    - cwd: {{ cfg.root }} 
+    - onchanges:
+      - file: {{ jail }}_patch_{{ patch.target }}_{{ loop.index }}
+    - require:
+      - cmd: {{ jail }}_start
 
 {% endif %}
 
@@ -159,7 +174,7 @@ jail_enable:
 
 {{ jail }}_freebsd_update_conf:
   file.replace:
-    - name: {{ jails.root | path_join(jail, 'etc', 'freebsd-update.conf') }}
+    - name: {{ cfg.root | path_join('etc', 'freebsd-update.conf') }}
     - pattern: |
         ^Components\s+.*
     - repl: |
@@ -176,7 +191,7 @@ jail_enable:
 
 {{ jail }}_pkg_repos:
   file.directory:
-    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos') }}
+    - name: {{ cfg.root | path_join('usr', 'local', 'etc', 'pkg', 'repos') }}
     - user: root
     - group: wheel
     - makedirs: True
@@ -188,7 +203,7 @@ jail_enable:
 
 {{ jail }}_pkg_repo_{{ rname }}:
   file.managed:
-    - name: {{ jails.root | path_join(jail, 'usr', 'local', 'etc', 'pkg', 'repos', rname ~ '.conf') }}
+    - name: {{ cfg.root | path_join('usr', 'local', 'etc', 'pkg', 'repos', rname ~ '.conf') }}
     - user: root
     - group: wheel
     - mode: 644
@@ -337,7 +352,7 @@ jail_enable:
     - env:
       - ASSUME_ALWAYS_YES: "YES"
       - JAILS_ROOT: {{ jails.root }}
-      - JAIL_ROOT: {{ jails.root | path_join(jail) }}
+      - JAIL_ROOT: {{ cfg.root }}
       - JAIL_RELEASE: {{ cfg.version }}
       - JAIL_NAME: {{ jail }}
       - SALT_MASTER: {{ cfg.salt.master }}
@@ -367,6 +382,10 @@ jail_enable:
     - require_in:
       - file: jail_etc_jail_conf
       - cmd: {{ jail }}_jail_list
+    - onlyif:
+      - fun: jail.status
+        args:
+          - {{ jail }}
 
 {{ jail }}_jail_list:
   cmd.run:
@@ -380,6 +399,29 @@ jail_enable:
     - name: /etc/fstab.{{ jail }}
     - require:
       - cmd: {{ jail }}_stop
+
+{% if cfg.purge_if_absent|default(False) %}
+
+{% if jails.use_zfs %}
+
+{% else %}
+
+{{ jail }}_chflags_noschg:
+  cmd.run:
+    - name: /bin/chflags -R noschg {{ cfg.root }}
+    - cwd: /tmp
+    - require:
+      - cmd: {{ jail }}_stop
+
+{{ jail }}_remove_directory:
+  file.absent:
+    - name: {{ cfg.root }}
+    - require:
+      - cmd: {{ jail }}_chflags_noschg
+
+{% endif %}  # jails.use_zfs
+
+{% endif %}  # jail.purge_if_absent
 
 {% endif %}  # IF PRESENT
  

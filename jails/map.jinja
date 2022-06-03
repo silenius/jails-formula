@@ -17,6 +17,10 @@
 {% do jails.update(salt.slsutil.merge(defaults.host, jails)) %}
 
 {% for jail_name, jail_config in jails.instances.items() %}
+    {% do jail_config.update(salt.slsutil.merge({
+        'root': salt.file.join(jails.root, jail_name)
+    }, jail_config)) %}
+
     {% do jail_config.update(salt.slsutil.merge(defaults.jails, jail_config)) %}
     {% do jail_config.update(salt.slsutil.merge(defaults.archs[jail_config.arch], jail_config)) %}
     {% do jail_config.update(salt.slsutil.merge(defaults.versions[jail_config.version], jail_config)) %}
