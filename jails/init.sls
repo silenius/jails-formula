@@ -196,6 +196,8 @@ jail_enable:
     - group: wheel
     - makedirs: True
     - mode: 755
+    - require:
+      - file: {{ jail }}_directory
 
 {% for rname, rconfig in cfg.get('pkg', {}).items() %}
 
@@ -217,6 +219,8 @@ jail_enable:
             {%- endif %}
           {%- endfor %}
         }
+    - require:
+      - file: {{ jail }}_pkg_repos
 
 {% endfor %}
 
