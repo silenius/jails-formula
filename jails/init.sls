@@ -28,7 +28,7 @@ jail_enable:
 
 jail_list:
   sysrc.managed:
-    - value: "{{ jails.instances | selectattr('present') | selectattr('boot_start') | join(' ', attribute='name') }}"
+    - value: {{ jails.sysrc_jail_list }}
 
 {% for jail, cfg in jails.instances.items() %}
 
