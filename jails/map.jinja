@@ -30,9 +30,6 @@
             {% do jail_config.update(salt.slsutil.merge(defaults.flavours[flavour], jail_config)) %}
         {% endfor %}
     {% endif %}
-    {% if jail_config.present and jail_config.boot_start %}
-        {% do jails.sysrc_jail_list.append(jail_name) %}
-    {% endif %}
 {% endfor %}
 
 {% do jails.update({
@@ -41,6 +38,6 @@
 
 {#
 {% do salt.log.info('*******************************') %}
-{% do salt.log.info(jails.sysrc_jail_list) %}
+{% do salt.log.info(jails) %}
 {% do salt.log.info('*******************************') %}
 #}
