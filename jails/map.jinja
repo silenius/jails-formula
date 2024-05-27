@@ -34,7 +34,7 @@
 
 {% do jails.update({
     'sysrc_jail_list': jails.instances.values()|selectattr('present')|selectattr('boot_start')|join(' ', 'name')
-})
+}) %}
 
 {#
 {% do salt.log.info('*******************************') %}
