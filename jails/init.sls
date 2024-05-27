@@ -26,6 +26,10 @@ jail_enable:
     - name: jail_enable
     - value: "YES"
 
+jail_list:
+  sysrc.managed:
+    - value: "{{ jails.instances | selectattr('present') | selectattr('boot_start') | join(' ', attribute='name') }}"
+
 {% for jail, cfg in jails.instances.items() %}
 
 {% if cfg.present %}
@@ -305,37 +309,13 @@ jail_enable:
 # START JAIL #
 ##############
 
-{% if cfg.boot_start %}
-
-# Start on boot, add to rc.conf jail_list
-
-{{ jail }}_jail_list:
-  cmd.run:
-    - name: sysrc jail_list+={{ jail }}
-    - cwd: /tmp
-    - unless:
-      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
-
-{% else %}
-
-# Do not start on boot, remove from rc.conf jail_list
-
-{{ jail }}_jail_list:
-  cmd.run:
-    - name: sysrc jail_list-={{ jail }}
-    - cwd: /tmp
-    - onlyif:
-      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
-
-{% endif %}
-
 {{ jail }}_start:
   cmd.run:
     - name: service jail onestart {{ jail }}
     - cwd: /tmp
     - require:
       - file: jail_etc_jail_conf
-      - cmd: {{ jail }}_jail_list
+      - sysrc: jail_list
     - onchanges:
       - file: {{ jail }}_directory
       - cmd: {{ jail }}_fstab_stop
@@ -381,18 +361,11 @@ jail_enable:
     - cwd: /tmp
     - require_in:
       - file: jail_etc_jail_conf
-      - cmd: {{ jail }}_jail_list
+      - sysrc: jail_list
     - onlyif:
       - fun: jail.status
         args:
           - {{ jail }}
-
-{{ jail }}_jail_list:
-  cmd.run:
-    - name: sysrc jail_list-={{ jail }}
-    - cwd: /tmp
-    - onlyif:
-      - sysrc -n jail_list|egrep -q '(^|[[:space:]]){{ jail }}($|[[:space:]])'
 
 {{ jail }}_fstab:
   file.absent:

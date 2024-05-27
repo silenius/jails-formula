@@ -19,6 +19,6 @@ host.hostname = "$name.xxx";
 
 {% for jail, cfg in jails.instances.items() if cfg.present %}
 {{ jail }} {
-{{ cfg.jail_conf }}
+{{ cfg.jail_conf|indent }}
 }
 {% endfor %}
