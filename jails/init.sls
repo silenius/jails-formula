@@ -317,6 +317,8 @@ jail_list:
     - require:
       - file: jail_etc_jail_conf
       - sysrc: jail_list
+    - require_in:
+      - cmd: {{ jail }}_freebsd_update_fetch_install
     - onchanges:
       - file: {{ jail }}_directory
       - cmd: {{ jail }}_fstab_stop
