@@ -1,6 +1,6 @@
 #!/bin/sh
 
-jexec "${JAIL_NAME}" pkg install pkg
+jexec "${JAIL_NAME}" pkg bootstrap
 
 [ -z "${PKG_SALT}" ] && PKG_SALT="$(jexec ${JAIL_NAME} pkg search -q -x '^py.*-salt' | sort -u -t '-' -k3.1n,3.4n -k 1.3n,1.5n | tail -1)"
 
