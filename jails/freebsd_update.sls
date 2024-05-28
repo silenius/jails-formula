@@ -6,10 +6,12 @@
 
 {{ jail }}_freebsd_update_fetch_install:
   cmd.run:
-    - name: freebsd-update --not-running-from-cron --currently-running {{ cfg.version }} -b {{ cfg.root }} -f {{ cfg.root | path_join('etc', 'freebsd-update.conf') }} -d {{ cfg.root | path_join('var', 'db', 'freebsd-update') }} fetch install
+    {% if salt.cmd.retcode("freebsd-update --help|grep -E '^\s -j jail'") %}
+    - name: freebsd-update --not-running-from-cron -j {{ jail }} -f {{ cfg.root | path_join('etc', 'freebsd-update.conf') }} fetch install
+    {% else %}
+    - name: freebsd-update --not-running-from-cron --currently-running {{ cfg.version }} -b {{ cfg.root }} -f {{ cfg.root | path_join('etc', 'freebsd-update.conf') }} fetch install
+    {% endif %}
     - cwd: /tmp
-    - parallel: True
     - env:
       - PAGER: cat
-
 {% endfor %}
