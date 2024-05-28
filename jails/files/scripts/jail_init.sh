@@ -2,7 +2,7 @@
 
 jexec "${JAIL_NAME}" pkg install pkg
 
-[ -z "${PKG_SALT}" ] && PKG_SALT="$(jexec ${JAIL_NAME} pkg search -q -x '^py.*-salt'|sort -ur|head -1)"
+[ -z "${PKG_SALT}" ] && PKG_SALT="$(jexec ${JAIL_NAME} pkg search -q -x '^py.*-salt' | sort -u -t '-' -k3.1n,3.4n -k 1.3n,1.5n | tail -1)"
 
 jexec "${JAIL_NAME}" << EOF
 pkg install ${PKG_SALT}
