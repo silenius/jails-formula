@@ -28,7 +28,8 @@ jail_enable:
 
 jail_list:
   sysrc.managed:
-    - value: {{ jails.sysrc_jail_list }}
+    - name: jail_list
+    - value: "{{ jails.sysrc_jail_list }}"
 
 {% for jail, cfg in jails.instances.items() %}
 
