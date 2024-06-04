@@ -1,4 +1,4 @@
-{% set jails = salt.pillar.get('jails') %}
+{% set jails = salt['pillar.get']('jails') %}
 
 exec.prestart += "cp /etc/resolv.conf $path/etc";
 exec.prestart += "cp /etc/localtime $path/etc";

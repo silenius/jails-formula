@@ -4,9 +4,9 @@
 {% import_yaml "jails/defaults/versions.yaml" as defaults_versions %}
 {% import_yaml "jails/defaults/flavours.yaml" as defaults_flavours %}
 
-{% set jails = salt.pillar.get('jails') %}
+{% set jails = salt['pillar.get']('jails') %}
 
-{% set defaults = salt.slsutil.merge({
+{% set defaults = salt['slsutil.merge']({
     'host': defaults_host,
     'jails': defaults_jails,
     'archs': defaults_archs,
@@ -14,20 +14,20 @@
     'flavours': defaults_flavours
 }, jails.lookup) %}
 
-{% do jails.update(salt.slsutil.merge(defaults.host, jails)) %}
+{% do jails.update(salt['slsutil.merge'](defaults.host, jails)) %}
 
 {% for jail_name, jail_config in jails.instances.items() %}
-    {% do jail_config.update(salt.slsutil.merge({
-        'root': salt.file.join(jails.root, jail_name),
+    {% do jail_config.update(salt['slsutil.merge']({
+        'root': salt['file.join'](jails.root, jail_name),
         'name': jail_name
     }, jail_config)) %}
 
-    {% do jail_config.update(salt.slsutil.merge(defaults.jails, jail_config)) %}
-    {% do jail_config.update(salt.slsutil.merge(defaults.archs[jail_config.arch], jail_config)) %}
-    {% do jail_config.update(salt.slsutil.merge(defaults.versions[jail_config.version], jail_config)) %}
+    {% do jail_config.update(salt['slsutil.merge'](defaults.jails, jail_config)) %}
+    {% do jail_config.update(salt['slsutil.merge'](defaults.archs[jail_config.arch], jail_config)) %}
+    {% do jail_config.update(salt['slsutil.merge'](defaults.versions[jail_config.version], jail_config)) %}
     {% if jail_config.flavours is defined and defaults.flavours is defined %}
         {% for flavour in jail_config.flavours %}
-            {% do jail_config.update(salt.slsutil.merge(defaults.flavours[flavour], jail_config)) %}
+            {% do jail_config.update(salt['slsutil.merge'](defaults.flavours[flavour], jail_config)) %}
         {% endfor %}
     {% endif %}
 {% endfor %}
@@ -37,7 +37,7 @@
 }) %}
 
 {#
-{% do salt.log.info('*******************************') %}
-{% do salt.log.info(jails) %}
-{% do salt.log.info('*******************************') %}
+{% do salt['log.info']('*******************************') %}
+{% do salt['log.info'](jails) %}
+{% do salt['log.info']('*******************************') %}
 #}
