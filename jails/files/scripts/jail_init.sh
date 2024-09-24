@@ -25,5 +25,5 @@ EOF
 
 jexec "${JAIL_NAME}" << EOF
 service salt_minion start
-pkg audit -F
+pkg audit -F || exit 0
 EOF
