@@ -89,6 +89,19 @@ jail_list:
     - user: root
     - group: wheel
     - mode: 644
+    - require:
+      - file: {{ jail }}_directory
+
+{{ jail }}_dev:
+  file.directory:
+    - name: {{ cfg.root | path_join('dev') }}
+    - user: root
+    - group: wheel
+    - mode: 555
+    - require_in:
+      - cmd: {{ jail }}_start
+    - require:
+      - file: {{ jail }}_directory
 
 {% for rc_param, rc_value in cfg.rc_conf.items() %}
 
