@@ -340,7 +340,7 @@ jail_list:
 # JAIL INIT SCRIPTS #
 #####################
 
-{% for init_script in cfg.init_scripts %}
+{% for init_script in cfg.get('init_scripts', ()) %}
 
 {{ jail }}_{{ init_script }}:
   cmd.script:
