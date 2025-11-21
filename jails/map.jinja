@@ -17,7 +17,7 @@
 {% do jails.update(salt['slsutil.merge'](defaults.host, jails)) %}
 
 {% for jail_name, jail_config in jails.instances.items() %}
-    {% do salt['log.info'](f"===>>> Processing: {jail_name}") %}
+    {% do salt['log.info']("===>>> Processing jail {}".format(jail_name)) %}
     {% do jail_config.update(salt['slsutil.merge']({
         'root': salt['file.join'](jails.root, jail_name),
         'name': jail_name
