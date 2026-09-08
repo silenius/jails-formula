@@ -312,7 +312,7 @@ jail_list:
     - require_in:
       - cmd: {{ jail }}_start
 
-{{ if cfg.get('write_jail_conf_d_file', False) }}
+{% if cfg.get('write_jail_conf_d_file', False) %}
 {{ jail }}_jail_conf_d:
   file.managed:
     - name: {{ jails.jail_conf_d[0] | path_join(jail) ~ '.conf' }}
@@ -324,7 +324,7 @@ jail_list:
         {{ jail }} {
         {{ cfg.jail_conf|indent }}
         }
-{{ endif }}
+{% endif %}
 
 {{ jail }}_once_stop:
   cmd.run:
