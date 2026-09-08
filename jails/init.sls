@@ -322,7 +322,7 @@ jail_list:
     - contents: |
         # File managed by Saltstack, do not modify!
         {{ jail }} {
-        {{ cfg.jail_conf|indent }}
+        {{ cfg.jail_conf|indent(10) }}
         }
 {% endif %}
 
