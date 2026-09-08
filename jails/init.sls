@@ -333,7 +333,7 @@ jail_list:
     - prereq:
       - file: {{ jail }}_fstab
       {% if cfg.get('write_jail_conf_d_file', False) %}
-      - file: {{ jails }}_jail_conf_d
+      - file: {{ jail }}_jail_conf_d
       {% endif %}
     - onlyif:
       - fun: jail.status
