@@ -312,12 +312,29 @@ jail_list:
     - require_in:
       - cmd: {{ jail }}_start
 
-{{ jail }}_fstab_stop:
+{{ if cfg.get('write_jail_conf_d_file', False) }}
+{{ jail }}_jail_conf_d:
+  file.managed:
+    - name: {{ jails.jail_conf_d[0] | path_join(jail) ~ '.conf' }}
+    - user: root
+    - group: wheel
+    - mode: 644
+    - contents: |
+        # File managed by Saltstack, do not modify!
+        {{ jail }} {
+        {{ cfg.jail_conf|indent }}
+        }
+{{ endif }}
+
+{{ jail }}_once_stop:
   cmd.run:
     - name: service jail onestop {{ jail }}
     - cwd: /tmp
     - prereq:
       - file: {{ jail }}_fstab
+      {% if cfg.get('write_jail_conf_d_file', False) %}
+      - file: {{ jails }}_jail_conf_d
+      {% endif %}
     - onlyif:
       - fun: jail.status
         args:
@@ -340,7 +357,7 @@ jail_list:
     {% endif %}
     - onchanges:
       - file: {{ jail }}_directory
-      - cmd: {{ jail }}_fstab_stop
+      - cmd: {{ jail }}_once_stop
 
 #####################
 # JAIL INIT SCRIPTS #
@@ -394,6 +411,16 @@ jail_list:
     - name: /etc/fstab.{{ jail }}
     - require:
       - cmd: {{ jail }}_stop
+
+{% for conf_d in jails.jail_conf_d|default([]) %}
+
+{{ jail }}_conf_d_{{ conf_d }}:
+  file.absent:
+    - name: {{ jails.jail_conf_d | path_join(jail) ~ '.conf' }}
+    - require:
+      - cmd: {{ jail }}_stop
+
+{% endfor %}
 
 {% if cfg.purge_if_absent|default(False) %}
 

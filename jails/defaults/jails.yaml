@@ -5,6 +5,7 @@ purge_if_absent: false
 run_freebsd_update: true
 arch: {{ salt.grains.get('osarch') }}
 version: {{ salt.grains.get('osrelease') ~ '-RELEASE' }}
+write_jail_conf_d_file: true
 rc_conf:
   salt_minion_enable: "YES"
 salt:
