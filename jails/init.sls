@@ -68,8 +68,10 @@ jail_list:
     - cwd: /tmp
     - onchanges:
       - file: {{ jail }}_directory
+    {% if cfg.run_freebsd_update %}
     - onchanges_in:
       - cmd: {{ jail }}_freebsd_update_fetch_install
+    {% endif %}
     - watch_in:
       - file: jail_etc_jail_conf
     - require_in:
@@ -190,6 +192,7 @@ jail_list:
 # JAIL /etc/freebsd-update.conf #
 #################################
 
+{% if cfg.run_freebsd_update %}
 {{ jail }}_freebsd_update_conf:
   file.replace:
     - name: {{ cfg.root | path_join('etc', 'freebsd-update.conf') }}
@@ -202,6 +205,7 @@ jail_list:
       - cmd: {{ jail }}_set_base.txz
     - require_in:
       - cmd: {{ jail }}_freebsd_update_fetch_install
+{% endif %}
 
 ####################
 # PKG REPOSITORIES #
@@ -330,8 +334,10 @@ jail_list:
     - require:
       - file: jail_etc_jail_conf
       - sysrc: jail_list
+    {% if cfg.run_freebsd_update %}
     - require_in:
       - cmd: {{ jail }}_freebsd_update_fetch_install
+    {% endif %}
     - onchanges:
       - file: {{ jail }}_directory
       - cmd: {{ jail }}_fstab_stop
